@@ -24,7 +24,9 @@ public class DashboardController {
         List<Inscription> allInscriptions = inscriptionRepository.findAll();
 
         long totalInscriptions = allInscriptions.size();
-        long paiementsConfirmes = allInscriptions.stream().filter(Inscription::isFraisPaye).count();
+        long paiementsConfirmes = allInscriptions.stream()
+                .filter(i -> Boolean.TRUE.equals(i.getFraisPaye()))
+                .count();
         long dossiersFinalises = allInscriptions.stream()
                 .filter(i -> i.getStatut() == Inscription.StatutInscription.FINALISEE)
                 .count();
@@ -35,16 +37,20 @@ public class DashboardController {
                 ? (int) ((dossiersFinalises * 100) / totalInscriptions) 
                 : 0;
 
-        // Récupération des 5 dernières activités (simplifié ici par les 5 dernières inscriptions)
-        List<Map<String, String>> activites = inscriptionRepository.findAll().stream()
+        // Récupération des 5 dernières activités
+        List<Map<String, String>> activites = allInscriptions.stream()
                 .sorted((a, b) -> b.getId().compareTo(a.getId()))
                 .limit(5)
                 .map(i -> {
                     Map<String, String> act = new HashMap<>();
                     act.put("id", i.getId().toString());
-                    act.put("nom", i.getEleve().getNom() + " " + i.getEleve().getPrenoms());
+                    String nomComplet = "N/A";
+                    if (i.getEleve() != null) {
+                        nomComplet = i.getEleve().getNom() + " " + i.getEleve().getPrenoms();
+                    }
+                    act.put("nom", nomComplet);
                     act.put("classe", i.getClasse() != null ? i.getClasse().getNom() : "N/A");
-                    act.put("statut", i.getStatut().toString());
+                    act.put("statut", i.getStatut() != null ? i.getStatut().toString() : "N/A");
                     return act;
                 })
                 .collect(Collectors.toList());
