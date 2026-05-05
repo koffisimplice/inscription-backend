@@ -27,6 +27,11 @@ public class Classe {
     @JsonIgnore
     private List<Inscription> inscriptions;
 
+    @Transient
+    public int getEffectifActuel() {
+        return inscriptions != null ? inscriptions.size() : 0;
+    }
+
     public enum Niveau {
         SIXIEME, CINQUIEME, QUATRIEME, TROISIEME,
         SECONDE, PREMIERE, TERMINALE
